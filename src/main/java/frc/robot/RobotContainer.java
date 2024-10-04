@@ -5,16 +5,24 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.auto.AutoDealer;
+
+import static frc.robot.auto.AutoDealer.*;
 
 public class RobotContainer {
-  public RobotContainer() {
+   private final AutoDealer dealer = new AutoDealer();
+  
+   public RobotContainer() {
+    dealer.request(kDefense);
+
     configureBindings();
   }
 
   private void configureBindings() {}
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    // return Commands.print("No autonomous command configured");
+
+    return dealer.getAutoRoutine();
   }
 }
