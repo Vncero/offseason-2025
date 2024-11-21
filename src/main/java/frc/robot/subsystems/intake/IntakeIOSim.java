@@ -11,7 +11,7 @@ public class IntakeIOSim implements IntakeIO {
     private DCMotorSim rollers;
 
     public IntakeIOSim() {
-        this.rollers = new DCMotorSim(DCMotor.getNEO(1), Intake.gearing, Intake.momentOfInertia);
+        // this.rollers = new DCMotorSim(DCMotor.getNEO(1), Intake.gearing, Intake.momentOfInertia);
     }
 
     @Override

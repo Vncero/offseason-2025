@@ -1,8 +1,6 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.*;
-
-import frc.robot.subsystems.intake.IntakeIO;
 
 /**
  * This IO implementation facilitates disabling a subsystem on the robot by not actuating any hardware
