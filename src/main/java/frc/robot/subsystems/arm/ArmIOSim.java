@@ -8,7 +8,7 @@ public class ArmIOSim implements ArmIO {
     private DCMotorSim pivot;
 
     public ArmIO.Config getConfig() {
-        return new ArmIO.Config(0, 0, 0, 0);
+        return new ArmIO.Config(0.1, 0, 0.04, 0);
     }
 
     public ArmIOSim() {
@@ -16,14 +16,15 @@ public class ArmIOSim implements ArmIO {
     }
 
     @Override
-    public void updateInputs(Inputs inputs) {
+    public void updateInputs(ArmIO.ArmInputs inputs) {
         // TODO: mech advantage did this. I'll do it like this too. lmk your thoughts. Are there any "periodic" operations that aren't "updating inputs"?
         pivot.update(0.02);
 
-        inputs.absoluteAngle = pivot.getAngularPositionRad();
+        inputs.absoluteAngle = Math.toDegrees(pivot.getAngularPositionRad());
         // TODO: thoughts on ways to deal with this? We don't have an "absolute" or "relative" angle in simulation but I'd still like to log both. We could just keep it like this 
-        inputs.relativeAngleLeft = pivot.getAngularPositionRad(); 
-        inputs.relativeAngleRight = pivot.getAngularPositionRad(); 
+        inputs.relativeAngleLeft = Math.toDegrees(pivot.getAngularPositionRad()); 
+        inputs.relativeAngleRight = Math.toDegrees(pivot.getAngularPositionRad()); 
+        inputs.velocity = Math.toDegrees(pivot.getAngularVelocityRadPerSec()); 
     }
 
     @Override

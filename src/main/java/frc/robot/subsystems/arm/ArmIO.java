@@ -1,7 +1,11 @@
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.AutoLog;
+
 public interface ArmIO {
-    public class Inputs {
+    // TODO: (akit) use AutoLog to automatically log all inputs
+    @AutoLog
+    public class ArmInputs {
         public double velocity; // TODO: we are not using units, unless you have a genuine reason to want to use it. 8/10 leaning towards not using it. 
         public double absoluteAngle; // TODO: degrees or radians? Or Rotation2d?
         public double relativeAngleLeft; 
@@ -14,7 +18,7 @@ public interface ArmIO {
     Config getConfig(); 
 
     // TODO: removed default keyword to ensure all implementations explicitly implement it. 1/10 leaning towards not using default?
-    void updateInputs(Inputs inputs);
+    void updateInputs(ArmInputs inputs);
 
     // TODO: should we use set(double power) or setVoltage(double volts)? We've historically just set power but ik SysID operates on PID with an output in volts. Also meh on either option, but we should probably standardize. 0/10, not leaning towards either option. 
     void set(double power);

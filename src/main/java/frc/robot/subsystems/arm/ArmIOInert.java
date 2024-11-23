@@ -6,7 +6,7 @@ public class ArmIOInert implements ArmIO {
     public ArmIOInert() {}
 
     @Override
-    public void updateInputs(ArmIO.Inputs inputs) {
+    public void updateInputs(ArmIO.ArmInputs inputs) {
         inputs.velocity = 0; 
         inputs.absoluteAngle = 0; 
         inputs.relativeAngleLeft = 0; 

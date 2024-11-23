@@ -4,16 +4,25 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.intake.Intake;
 
 public class RobotContainer {
   private final Intake intake = Intake.create();
+  private final Arm arm = Arm.create(); 
 
   private final CommandXboxController manipulator = new CommandXboxController(1);
 
   public RobotContainer() {
+    arm.setDefaultCommand(
+      arm.goToAngle(20)
+      // arm.tune()
+      ); 
     intake.setDefaultCommand(intake.stop());
 
     configureBindings();

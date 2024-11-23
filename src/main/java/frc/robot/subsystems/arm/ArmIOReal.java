@@ -51,7 +51,7 @@ public class ArmIOReal implements ArmIO {
 
 
     @Override
-    public void updateInputs(ArmIO.Inputs inputs) {
+    public void updateInputs(ArmIO.ArmInputs inputs) {
         inputs.absoluteAngle = armAbsoluteEncoder.getPosition();
 
         inputs.relativeAngleLeft = relEncoderLeft.getPosition();
