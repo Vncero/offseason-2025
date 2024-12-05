@@ -1,7 +1,29 @@
 {
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
+      "/FMSInfo": "FMSInfo",
+      "Robot/RobotContainer/Arm/armController": "PIDController",
+      "Robot/RobotContainer/Intake/controller": "PIDController",
+      "Robot/m_robotContainer/Arm/armController": "PIDController"
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Robot": {
+        "RobotContainer": {
+          "Arm": {
+            "ArmFeedforward##v_Robot/RobotContainer/Arm/armFeedforward": {
+              "open": true
+            },
+            "inputs": {
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
     }
   },
   "NetworkTables Info": {

@@ -2,10 +2,7 @@ package frc.robot.subsystems.arm;
 
 import java.util.function.DoubleSupplier;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
-
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -13,48 +10,46 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+@Logged
 public class Arm extends SubsystemBase {
 
+    public record ArmConfig(double kP, double kI, double kD, double kG) {}    
+
     private ArmIO io; 
-    // TODO: (akit) they generate a ghost "__AutoLogged" class that implements the logic for logging; this means we'll name it "<Subsystem>Inputs" instead of "Inputs"
-    private ArmInputsAutoLogged inputs; 
+    private ArmInputs inputs; 
 
     private PIDController armController;
     private ArmFeedforward armFeedforward; 
 
-    // TODO: this is one way to log setpoint outputs. is this good?
-    @AutoLogOutput
     private double setpoint; 
 
-    // TODO: should we put these in a constants file?
     public static final double GEARING = 3 * 4 * 5; 
     public static final double MOI = 10; 
 
     public static Arm create() {
         return RobotBase.isReal() ? 
-            new Arm(new ArmIOReal()) : 
-            new Arm(new ArmIOSim()); 
+            new Arm(new ArmIOReal(), ArmIOReal.config) : 
+            new Arm(new ArmIOSim(), ArmIOSim.config); 
     }
 
     
     public static Arm disable() {
-        return new Arm(new ArmIOInert()); 
+        return new Arm(new ArmIOIdeal(), ArmIOIdeal.config); 
     }
 
 
-    public Arm(ArmIO io) {
+    public Arm(ArmIO io, ArmConfig config) {
         this.io = io; 
-        this.inputs = new ArmInputsAutoLogged();
+        this.inputs = new ArmInputs();
         
-        this.armController = new PIDController(io.getConfig().kP(), io.getConfig().kI(), io.getConfig().kD()); 
-        this.armFeedforward = new ArmFeedforward(0, io.getConfig().kG(), 0); 
+        this.armController = new PIDController(config.kP, config.kI, config.kD); 
+        this.armFeedforward = new ArmFeedforward(0, config.kG, 0); 
         
     }
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
-        Logger.processInputs("ArmSubsystem", inputs);
     }
 
     // TODO: I'm leaning towards not using the Trigger structure since we can wrap around it anytime we want? idk I prefer using raw values instead. 4/10 leaning towards not using Triggers. 
@@ -67,37 +62,35 @@ public class Arm extends SubsystemBase {
     }
 
     public Command goToAngle(DoubleSupplier angleSupp) {
-        // TODO: should this end when we're at the angle? or do that in an outside implementation
         // TODO: more: how should we log the setpoint? it's not a direct "input" from a physical system but is pretty important. One way might be to just log the current command running and its information but idk how that implementation will work
         return run(() -> {
             this.setpoint = angleSupp.getAsDouble(); 
-            double pidOutput = armController.calculate(inputs.absoluteAngle, angleSupp.getAsDouble()) + this.armFeedforward.calculate(angleSupp.getAsDouble(), 0); 
-            io.set(pidOutput);
-        })
-        // .until(this::atPosition) // ??
-        ;
+            double pidOutput = armController.calculate(inputs.absoluteAngle.getDegrees(), angleSupp.getAsDouble()) + this.armFeedforward.calculate(angleSupp.getAsDouble(), 0); 
+            io.setVoltage(pidOutput);
+        });
     }
 
-    public Command runPower(double power) {
+    public Command runVolts(double volts) {
         return run(() -> {
-            io.set(power);
+            io.setVoltage(volts);
         });
     }
 
     public Command tune() {
-        // TODO: is this good? any better way?
-        LoggedDashboardNumber kP = new LoggedDashboardNumber("Arm/kP", io.getConfig().kP()); 
-        LoggedDashboardNumber kI = new LoggedDashboardNumber("Arm/kI", io.getConfig().kI()); 
-        LoggedDashboardNumber kD = new LoggedDashboardNumber("Arm/kD", io.getConfig().kD());
-        LoggedDashboardNumber kG = new LoggedDashboardNumber("Arm/kG", io.getConfig().kG());
-        LoggedDashboardNumber setpoint = new LoggedDashboardNumber("Arm/tuningSetpoint");  
-        return 
-        goToAngle(() -> setpoint.get())
-        // TODO: ik this is bad convention. find a better way if you want to. 
-        .alongWith(Commands.run(() -> {
-            armController.setPID(kP.get(), kI.get(), kD.get());
-            armFeedforward = new ArmFeedforward(0, kG.get(), 0); 
-        }));
+        // TODO: redo this with the implementation-independent config
+        // LoggedDashboardNumber kP = new LoggedDashboardNumber("Arm/kP", io.getConfig().kP()); 
+        // LoggedDashboardNumber kI = new LoggedDashboardNumber("Arm/kI", io.getConfig().kI()); 
+        // LoggedDashboardNumber kD = new LoggedDashboardNumber("Arm/kD", io.getConfig().kD());
+        // LoggedDashboardNumber kG = new LoggedDashboardNumber("Arm/kG", io.getConfig().kG());
+        // TODO: is this a "full test"?
+        // return runOnce(() -> {
+        //     armController.setPID(kP.get(), kI.get(), kD.get());
+        //     armFeedforward = new ArmFeedforward(0, kG.get(), 0); 
+        // })
+        // .andThen(goToAngle(20).until(this::atPosition))
+        // .andThen(goToAngle(80).until(this::atPosition))
+        // .andThen(goToAngle(40).until(this::atPosition)); 
+        return Commands.none(); 
     }
 
 }
