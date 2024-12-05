@@ -21,15 +21,13 @@ public class Arm extends SubsystemBase {
     private PIDController armController;
     private ArmFeedforward armFeedforward; 
 
-    private double setpoint; 
-
     public static final double GEARING = 3 * 4 * 5; 
     public static final double MOI = 10; 
 
     public static Arm create() {
         return RobotBase.isReal() ? 
             new Arm(new ArmIOReal(), ArmIOReal.config) : 
-            new Arm(new ArmIOSim(), ArmIOSim.config); 
+            new Arm(new ArmIOReal(), ArmIOSim.config); 
     }
 
     
@@ -62,9 +60,7 @@ public class Arm extends SubsystemBase {
     }
 
     public Command goToAngle(DoubleSupplier angleSupp) {
-        // TODO: more: how should we log the setpoint? it's not a direct "input" from a physical system but is pretty important. One way might be to just log the current command running and its information but idk how that implementation will work
         return run(() -> {
-            this.setpoint = angleSupp.getAsDouble(); 
             double pidOutput = armController.calculate(inputs.absoluteAngle.getDegrees(), angleSupp.getAsDouble()) + this.armFeedforward.calculate(angleSupp.getAsDouble(), 0); 
             io.setVoltage(pidOutput);
         });

@@ -4,6 +4,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.arm.Arm.ArmConfig;
 
+@Logged
 public class ArmIOIdeal implements ArmIO {
 
     public static final ArmConfig config = new ArmConfig(0, 0, 0, 0);

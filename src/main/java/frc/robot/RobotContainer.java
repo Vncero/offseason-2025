@@ -18,9 +18,6 @@ public class RobotContainer {
   public final Intake intake = Intake.disable();
   @Logged(name = "Arm")
   public final Arm arm = Arm.create(); 
-
-  public String a = "hi"; 
-
   
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController manipulator = new CommandXboxController(1);

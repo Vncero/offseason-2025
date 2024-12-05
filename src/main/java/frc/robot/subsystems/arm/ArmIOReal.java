@@ -13,11 +13,12 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.arm.Arm.ArmConfig;
 
+@Logged
 public class ArmIOReal implements ArmIO {
     public static final ArmConfig config = new ArmConfig(0.05, 0, 0, 0);
 
     private SparkMax leftPivot = new SparkMax(0, MotorType.kBrushless); 
-    private SparkMax rightPivot = new SparkMax(0, MotorType.kBrushless); 
+    private SparkMax rightPivot = new SparkMax(1, MotorType.kBrushless); 
     private AbsoluteEncoder armAbsoluteEncoder = leftPivot.getAbsoluteEncoder(); 
 
 
@@ -27,8 +28,6 @@ public class ArmIOReal implements ArmIO {
     }
 
     private void setupMotors() {
-
-        // TODO: where to put constants? Does the Constants file work for this type of structure?
 
         leftPivot.configure(
             new SparkMaxConfig()

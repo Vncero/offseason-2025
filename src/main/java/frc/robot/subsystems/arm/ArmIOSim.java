@@ -7,6 +7,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.subsystems.arm.Arm.ArmConfig;
 
+@Logged
 public class ArmIOSim implements ArmIO {
 
     public static final ArmConfig config = new ArmConfig(0.02, 0, 0, 0); 
