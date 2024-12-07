@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.epilogue.Logged;
 
 /**
  * This IO implementation facilitates disabling a subsystem on the robot by not actuating any hardware
@@ -11,8 +11,8 @@ public class IntakeIOIdeal implements IntakeIO {
     public IntakeIOIdeal() {}
 
     @Override
-    public void updateInputs(IntakeIO.Inputs inputs) {
-        inputs.velocity = MetersPerSecond.of(0);
+    public void updateInputs(IntakeInputs inputs) {
+        inputs.velocityMetersPerSecond = 0;
         inputs.hasNote = true;
     }
 }

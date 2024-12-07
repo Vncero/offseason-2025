@@ -1,20 +1,14 @@
-package frc.robot.subsystems.intake;
-
-import static edu.wpi.first.units.Units.*;
+package frc.robot.subsystems.intake; 
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
-import frc.robot.subsystems.IntakeIOIdeal;
 
 
 /**
@@ -25,6 +19,7 @@ import frc.robot.subsystems.IntakeIOIdeal;
  * - create() and (partly) disable() from Team 1155 SciBorgs
  * - command-based from https://bovlb.github.io/frc-tips/commands/best-practices.html
  */
+@Logged
 public class Intake extends SubsystemBase {
     public record Config(double kP, double kI, double kD) {}
     
@@ -32,10 +27,10 @@ public class Intake extends SubsystemBase {
     public static final double kMomentOfInertia = 0.001;
 
     // should be a fairly small fraction of robot voltage, < 0.50?
-    public static final Measure<Voltage> kIntakingVoltage = Volts.of(0.25 * Constants.kRobotInitialVoltage.in(Volts));
+    public static final double kIntakingVoltage = 0.25 * Constants.kRobotInitialVoltage;
     
     private final IntakeIO io;
-    private final IntakeIO.Inputs inputs;
+    private final IntakeInputs inputs;
 
     private final PIDController controller;
 
@@ -67,7 +62,7 @@ public class Intake extends SubsystemBase {
 
     private Intake(IntakeIO io, Config config) {
         this.io = io;
-        this.inputs = new IntakeIO.Inputs();
+        this.inputs = new IntakeInputs();
         this.controller = new PIDController(config.kP, config.kI, config.kD);
 
         this.hasNote = new Trigger(() -> inputs.hasNote);
@@ -98,7 +93,7 @@ public class Intake extends SubsystemBase {
      * @param voltage the desired voltage to run the rollers at (this is a supplier, which looks like `() -> Volts.of(voltage)`)
      * @return a command that runs forever and sets the target voltage of the rollers to the desired voltage
      * */ 
-    private Command runVoltage(Supplier<Measure<Voltage>> voltage) {
+    private Command runVoltage(Supplier<Double> voltage) {
         return run(() -> io.setVoltage(voltage.get()));
     }
 
@@ -107,9 +102,9 @@ public class Intake extends SubsystemBase {
      * @param velocity the deseired velocity to run the rollers at
      * @return a command that runs forever and uses a PID to reach the desired velocity
      */
-    private Command runVelocity(Measure<Velocity<Distance>> velocity) {
-        controller.setSetpoint(velocity.in(MetersPerSecond));
-        return runVoltage(() -> Volts.of(controller.calculate(this.inputs.velocity.in(MetersPerSecond))));
+    private Command runVelocity(double velocity) {
+        controller.setSetpoint(velocity);
+        return runVoltage(() -> controller.calculate(this.inputs.velocityMetersPerSecond));
     }
 
     /**
@@ -118,6 +113,6 @@ public class Intake extends SubsystemBase {
      * since they'll be repeatedly scheduled anyway if there's no other Command assigned to the subsystem
      */
     public Command stop() {
-        return runOnce(() -> io.setVoltage(Volts.zero()));
+        return runOnce(() -> io.setVoltage(0));
     }
 }

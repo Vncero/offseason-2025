@@ -1,9 +1,10 @@
 package frc.robot.subsystems.intake;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.Voltage;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.subsystems.intake.Intake.Config;
 
 public class IntakeIOSim implements IntakeIO {
     public static final Intake.Config config = new Intake.Config(0, 0, 0);
@@ -15,11 +16,11 @@ public class IntakeIOSim implements IntakeIO {
     }
 
     @Override
-    public void updateInputs(IntakeIO.Inputs inputs) {
+    public void updateInputs(IntakeInputs inputs) {
     }
 
     @Override
-    public void setVoltage(Measure<Voltage> voltage) {
+    public void setVoltage(double voltage) {
         
     }
 }
