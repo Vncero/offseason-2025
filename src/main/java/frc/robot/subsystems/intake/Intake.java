@@ -25,6 +25,7 @@ import frc.robot.util.Tuning;
 public class Intake extends SubsystemBase {
     public record IntakeConfig(double kP, double kI, double kD) {}
     
+    // for any physical measurement/quantity, it is important to track units---name such variables with their units (or else. . .)
     public static final double kWheelRadiusMeters = 0.025;
 
     public static final double kGearing = 1.0;
