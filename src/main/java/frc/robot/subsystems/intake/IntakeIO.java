@@ -1,13 +1,8 @@
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import edu.wpi.first.epilogue.Logged;
 
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Velocity;
-import edu.wpi.first.units.measure.Voltage;
-
-
+@Logged
 public interface IntakeIO {
     /**
      * In the IO system model, inputs are the data that is read from the robot's sensors at every iteration
@@ -16,9 +11,14 @@ public interface IntakeIO {
      */
 
     /*
-     * logging is still up in the air, but this is also where inputs would be updated for the next robot loop
+     * (optional): WPILib has Alerts, which may be nice for interfacing robot state with driver dashboards so both drivers and code know about issues
+     * --- there may be a way to disable subsystems mid-match? error handling (along with LED signals) are still to be developed
+     */
+
+    /*
+     * This is where inputs would be updated for the next robot loop
      */
     default void updateInputs(IntakeInputs inputs) {}
 
-    default void setVoltage(double voltage) {}
+    default void setVoltage(double volts) {}
 }

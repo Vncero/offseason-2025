@@ -7,7 +7,7 @@ import edu.wpi.first.epilogue.Logged;
  * However, it does produce inputs that match end conditions so Intake commands do not stall
  */
 public class IntakeIOIdeal implements IntakeIO {
-
+    
     public IntakeIOIdeal() {}
 
     @Override

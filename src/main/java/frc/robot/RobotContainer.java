@@ -5,9 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.intake.Intake;
@@ -33,9 +31,15 @@ public class RobotContainer {
 
   private void configureBindings() {
     driver.a().whileTrue(arm.goToAngle(80)); 
-    // manipulator
-    //   .rightBumper()
-    //   .whileTrue(intake.runRollers()); // notice here there's an implicit end condition: right bumper is released
+    manipulator
+      .rightBumper()
+      .whileTrue(intake.runRollers()); // notice here there's an implicit end condition: right bumper is released
+
+    manipulator.rightTrigger()
+      .and(intake.hasNote.negate()) // negate() is a fancy way to say !hasNote
+      // easily using subsystem Triggers to bind commands that run based on robot state is one of the nicest reasons for Triggers
+      // combining Triggers to track robot state will be used more extensively with superstructure work to come
+      .whileTrue(intake.tune());
   }
 
   public Command getAutonomousCommand() {

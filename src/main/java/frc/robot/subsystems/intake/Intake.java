@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake; 
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.epilogue.Logged;
@@ -9,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.util.Tuning;
 
 
 /**
@@ -21,18 +23,16 @@ import frc.robot.Constants;
  */
 @Logged
 public class Intake extends SubsystemBase {
-    public record Config(double kP, double kI, double kD) {}
+    public record IntakeConfig(double kP, double kI, double kD) {}
     
+    public static final double kWheelRadiusMeters = 0.025;
+
     public static final double kGearing = 1.0;
-    public static final double kMomentOfInertia = 0.001;
+    public static final double kMomentOfInertiaKgMetersSquared = 0.001;
 
     // should be a fairly small fraction of robot voltage, < 0.50?
     public static final double kIntakingVoltage = 0.25 * Constants.kRobotInitialVoltage;
     
-    private final IntakeIO io;
-    private final IntakeInputs inputs;
-
-    private final PIDController controller;
 
     /**
      * Triggers should be the only way for other subsystems to acquire information about a subsystem, which is the Intake here
@@ -46,6 +46,13 @@ public class Intake extends SubsystemBase {
     */ 
     public final Trigger hasNote;
 
+
+    private final IntakeIO io;
+    private final IntakeInputs inputs;
+
+    private final PIDController controller;
+
+
     public static Intake create() {
         return RobotBase.isReal()
         ? new Intake(new IntakeIOReal(), IntakeIOReal.config)
@@ -57,10 +64,10 @@ public class Intake extends SubsystemBase {
      * this method provides a convenient way to no-op all of the subsystem's commands
      */
     public static Intake disable() {
-        return new Intake(new IntakeIOIdeal(), new Intake.Config(0, 0, 0));
+        return new Intake(new IntakeIOIdeal(), new Intake.IntakeConfig(0, 0, 0));
     }
 
-    private Intake(IntakeIO io, Config config) {
+    private Intake(IntakeIO io, IntakeConfig config) {
         this.io = io;
         this.inputs = new IntakeInputs();
         this.controller = new PIDController(config.kP, config.kI, config.kD);
@@ -102,9 +109,10 @@ public class Intake extends SubsystemBase {
      * @param velocity the deseired velocity to run the rollers at
      * @return a command that runs forever and uses a PID to reach the desired velocity
      */
-    private Command runVelocity(double velocity) {
-        controller.setSetpoint(velocity);
-        return runVoltage(() -> controller.calculate(this.inputs.velocityMetersPerSecond));
+    private Command runVelocity(DoubleSupplier velocity) {
+        return 
+            runOnce(() -> controller.setSetpoint(velocity.getAsDouble()))
+                .andThen(runVoltage(() -> controller.calculate(this.inputs.velocityMetersPerSecond)));
     }
 
     /**
@@ -114,5 +122,38 @@ public class Intake extends SubsystemBase {
      */
     public Command stop() {
         return runOnce(() -> io.setVoltage(0));
+    }
+
+    /**
+     * Tuning controllers is a key part of coding a working subsystem
+     * The idea with specific commands for tuning is to:
+     * 1. Update the PID constants and testing setpoint from the driver dashboard 
+     * 2. Test the subsystem moving to the setpoint with the new PID constants and see how well it does---command ends when the subsystem roughly reaches the setpoint
+     * 3. Record working PID constants
+     * 
+     * These commands should be bound to a controller trigger/button so there's an implied end condition of letting the trigger go
+     * ---stopping the test if the subsystem goes insane
+     */
+    public Command tune() {
+        var kP = Tuning.entry("kP", controller.getP());
+        var kI = Tuning.entry("kI", controller.getI());
+        var kD = Tuning.entry("kD", controller.getD());
+        var setpointMetersPerSecond = Tuning.entry("target velocity (m per s)", 0);
+        return tune(
+            () -> kP.get(),
+            () -> kI.get(),
+            () -> kD.get(),
+            () -> setpointMetersPerSecond.get()
+        );
+    }
+
+    // these remain as suppliers just in case other ways of reading setpoints and constants are appropriate
+    private Command tune(
+        DoubleSupplier kP, DoubleSupplier kI, DoubleSupplier kD, DoubleSupplier targetVelocity
+    ) {
+        return 
+            runOnce(() -> controller.setPID(kP.getAsDouble(), kI.getAsDouble(), kD.getAsDouble()))
+            .andThen(runVelocity(targetVelocity)
+                .until(hasNote));
     }
 }
